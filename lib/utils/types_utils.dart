@@ -22,7 +22,14 @@
 // SOFTWARE.
 // ignore_for_file: public_member_api_docs
 
+import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
+
+bool isNullableType(DartType? type) =>
+    type?.nullabilitySuffix == NullabilitySuffix.question;
+
+bool isIterableOrSubclass(DartType? type) =>
+    _checkSelfOrSupertypes(type, (t) => t?.isDartCoreIterable ?? false);
 
 bool hasWidgetType(DartType type) =>
     (isWidgetOrSubclass(type) ||
@@ -148,3 +155,10 @@ bool _isFutureInheritedProvider(DartType type) =>
     type.isDartAsyncFuture &&
     type is InterfaceType &&
     _isSubclassOfInheritedProvider(type.typeArguments.firstOrNull);
+
+bool _checkSelfOrSupertypes(
+  DartType? type,
+  bool Function(DartType?) predicate,
+) =>
+    predicate(type) ||
+    (type is InterfaceType && type.allSupertypes.any(predicate));
